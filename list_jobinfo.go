@@ -36,11 +36,14 @@ func main() {
     jobsClient := clientset.BatchV1().Jobs("default")
     job := &batchv1.Job{
         ObjectMeta: metav1.ObjectMeta{
-            Name: "whalesay-job",
+            GenerateName: "whalesay-job-",
             Namespace: "default",
         },
         Spec: batchv1.JobSpec{
             Template: v1.PodTemplateSpec{
+                ObjectMeta: metav1.ObjectMeta{
+                    GenerateName: "whalesay-job-",
+                },
                 Spec: v1.PodSpec{
                     Containers: []v1.Container{
                         {
@@ -48,6 +51,7 @@ func main() {
                             Image: "docker/whalesay",
                         },
                     },
+                    RestartPolicy: v1.RestartPolicyOnFailure,
                 },
             },
         },
