@@ -1,10 +1,8 @@
 package main
 
 import (
-    "flag"
     "fmt"
-    "k8s.io/client-go/util/homedir"
-    "path/filepath"
+    "time"
     /* oidc needed for auth to IBM Cloud but is not referenced specifically in
     this script */
     _ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
@@ -12,59 +10,68 @@ import (
     batchv1 "k8s.io/api/batch/v1"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
     "k8s.io/client-go/kubernetes"
-    "k8s.io/client-go/tools/clientcmd"
+    "k8s.io/client-go/rest"
 )
 
-func main() {
-    var kubeconfig *string
-    if home := homedir.HomeDir(); home != "" {
-        kubeconfig = flag.String("kubeconfig", filepath.Join(home, "kubeconfig.yml"), "(optional) absolute path to the kubeconfig file")
-    } else {
-        kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-    }
-    flag.Parse()
+func minuteTicker() *time.Ticker {
+    // Return new ticker that triggers on the minute
+    return time.NewTicker(time.Second * time.Duration(60-time.Now().Second()))
+}
 
-    config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+func main() {
+    // creates in-cluster config
+    config, err := rest.InClusterConfig()
     if err != nil {
-        panic(err)
+        panic(err.Error())
     }
+    // creates the clientset
     clientset, err := kubernetes.NewForConfig(config)
     if err != nil {
-        panic(err)
+        panic(err.Error())
     }
 
-    jobsClient := clientset.BatchV1().Jobs("default")
-    job := &batchv1.Job{
-        ObjectMeta: metav1.ObjectMeta{
-            GenerateName: "whalesay-job-",
-            Namespace: "default",
-        },
-        Spec: batchv1.JobSpec{
-            Template: v1.PodTemplateSpec{
-                ObjectMeta: metav1.ObjectMeta{
-                    GenerateName: "whalesay-job-",
-                },
-                Spec: v1.PodSpec{
-                    Containers: []v1.Container{
-                        {
-                            Name:  "whalesay",
-                            Image: "docker/whalesay",
-                        },
+    fmt.Println("Started ticker")
+    // tick on the minute
+    t := minuteTicker()
+    for {
+        <-t.C
+        t = minuteTicker()
+        fmt.Println("Calling create_job()")
+        // create jobs client
+        jobsClient := clientset.BatchV1().Jobs("default")
+        // construct kubernetes job
+        job := &batchv1.Job{
+            ObjectMeta: metav1.ObjectMeta{
+                GenerateName: "whalesay-job-",
+                Namespace: "default",
+            },
+            Spec: batchv1.JobSpec{
+                Template: v1.PodTemplateSpec{
+                    ObjectMeta: metav1.ObjectMeta{
+                        GenerateName: "whalesay-job-",
                     },
-                    RestartPolicy: v1.RestartPolicyOnFailure,
+                    Spec: v1.PodSpec{
+                        Containers: []v1.Container{
+                            {
+                                Name:  "whalesay",
+                                Image: "docker/whalesay",
+                            },
+                        },
+                        RestartPolicy: v1.RestartPolicyOnFailure,
+                    },
                 },
             },
-        },
-    }
+        }
 
-    fmt.Println("Creating job... ")
-    result1, err1 := jobsClient.Create(job)
-    if err != nil {
-        fmt.Println(err1)
-        panic(err1)
+        // send job to kubernetes api
+        fmt.Println("Creating job... ")
+        result1, err1 := jobsClient.Create(job)
+        if err != nil {
+            fmt.Println(err1)
+            panic(err1)
+        }
+        fmt.Printf("Created job %q.\n", result1)
+        fmt.Println("Listing jobs....")
+        fmt.Println(jobsClient.List(metav1.ListOptions{}))
     }
-    fmt.Printf("Created job %q.\n", result1)
-
-    fmt.Println("Listing jobs....")
-    fmt.Println(jobsClient.List(metav1.ListOptions{}))
 }
