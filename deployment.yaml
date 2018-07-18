@@ -1,0 +1,17 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: job-controller
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: job-controller
+    spec:
+      containers:
+      - name: workshop
+        image: eggshell/k8s-jobs-go
+        ports:
+          - containerPort: 9090
