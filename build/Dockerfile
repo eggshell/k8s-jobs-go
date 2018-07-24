@@ -5,10 +5,10 @@ WORKDIR $GOPATH/src/
 
 # get dependencies
 RUN go get -d -v
-RUN go get k8s.io/client-go/...
+RUN go get -v k8s.io/client-go/...
 
 # build the binary
-RUN go build -o /go/bin/create_job.go
+RUN go build -v -o /go/bin/create_job.go
 
 # STEP 2 build a small image
 # start from alpine
