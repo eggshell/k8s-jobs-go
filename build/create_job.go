@@ -13,12 +13,11 @@ import (
     "k8s.io/client-go/rest"
 )
 
-func minuteTicker() *time.Ticker {
-    // Return new ticker that triggers on the minute
-    return time.NewTicker(time.Second * time.Duration(60-time.Now().Second()))
+type Client struct {
+    clientset kubernetes.Interface
 }
 
-func main() {
+func NewClientInCluster() (*Client, error) {
     // creates in-cluster config
     config, err := rest.InClusterConfig()
     if err != nil {
@@ -30,48 +29,64 @@ func main() {
         panic(err.Error())
     }
 
-    fmt.Println("Started ticker")
-    // tick on the minute
-    t := minuteTicker()
-    for {
-        <-t.C
-        t = minuteTicker()
-        fmt.Println("Calling create_job()")
-        // create jobs client
-        jobsClient := clientset.BatchV1().Jobs("default")
-        // construct kubernetes job
-        job := &batchv1.Job{
-            ObjectMeta: metav1.ObjectMeta{
-                GenerateName: "whalesay-job-",
-                Namespace: "default",
-            },
-            Spec: batchv1.JobSpec{
-                Template: v1.PodTemplateSpec{
-                    ObjectMeta: metav1.ObjectMeta{
-                        GenerateName: "whalesay-job-",
-                    },
-                    Spec: v1.PodSpec{
-                        Containers: []v1.Container{
-                            {
-                                Name:  "whalesay",
-                                Image: "docker/whalesay",
-                            },
+    return &Client{
+        clientset: clientset,
+    }, nil
+}
+
+func ConstructJob() *batchv1.Job {
+    job := &batchv1.Job{
+        ObjectMeta: metav1.ObjectMeta{
+            GenerateName: "whalesay-job-",
+            Namespace: "default",
+        },
+        Spec: batchv1.JobSpec{
+            Template: v1.PodTemplateSpec{
+                ObjectMeta: metav1.ObjectMeta{
+                    GenerateName: "whalesay-job-",
+                },
+                Spec: v1.PodSpec{
+                    Containers: []v1.Container{
+                        {
+                            Name:  "whalesay",
+                            Image: "docker/whalesay",
                         },
-                        RestartPolicy: v1.RestartPolicyOnFailure,
                     },
+                    RestartPolicy: v1.RestartPolicyOnFailure,
                 },
             },
-        }
-
-        // send job to kubernetes api
-        fmt.Println("Creating job... ")
-        result1, err1 := jobsClient.Create(job)
-        if err != nil {
-            fmt.Println(err1)
-            panic(err1)
-        }
-        fmt.Printf("Created job %q.\n", result1)
-        fmt.Println("Listing jobs....")
-        fmt.Println(jobsClient.List(metav1.ListOptions{}))
+        },
     }
+
+    return job
+}
+
+func CreateJobs(t time.Time) {
+    // get k8s client from serviceaccount token
+    c, err := NewClientInCluster()
+    // create jobs client
+    jobsClient := c.clientset.BatchV1().Jobs("default")
+    // construct kubernetes job
+    job := ConstructJob()
+
+    // send job to kubernetes api
+    fmt.Println("Creating job... ")
+    result1, err1 := jobsClient.Create(job)
+    if err != nil {
+        fmt.Println(err1)
+        panic(err1)
+    }
+    fmt.Printf("Created job %q.\n", result1)
+    //fmt.Println("Listing jobs....")
+    //fmt.Println(jobsClient.List(metav1.ListOptions{}))
+}
+
+func doEvery(d time.Duration, f func(time.Time)) {
+    for x := range time.Tick(d) {
+        f(x)
+    }
+}
+
+func main() {
+    doEvery(15000*time.Millisecond, CreateJobs)
 }
