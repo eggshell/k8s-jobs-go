@@ -12,6 +12,4 @@ spec:
     spec:
       containers:
       - name: workshop
-        image: eggshell/client-go
-#        ports:
-#          - containerPort: 9090
+        image: eggshell/job-controller
