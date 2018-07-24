@@ -18,12 +18,12 @@ type Client struct {
 }
 
 func NewClientInCluster() (*Client, error) {
-    // creates in-cluster config
+    // gets in-cluster config using serviceaccount token
     config, err := rest.InClusterConfig()
     if err != nil {
         panic(err.Error())
     }
-    // creates the clientset
+    // creates the clientset from config
     clientset, err := kubernetes.NewForConfig(config)
     if err != nil {
         panic(err.Error())
@@ -62,7 +62,7 @@ func ConstructJob() *batchv1.Job {
 }
 
 func CreateJobs(t time.Time) {
-    // get k8s client from serviceaccount token
+    // get k8s client
     c, err := NewClientInCluster()
     // create jobs client
     jobsClient := c.clientset.BatchV1().Jobs("default")
@@ -77,8 +77,6 @@ func CreateJobs(t time.Time) {
         panic(err1)
     }
     fmt.Printf("Created job %q.\n", result1)
-    //fmt.Println("Listing jobs....")
-    //fmt.Println(jobsClient.List(metav1.ListOptions{}))
 }
 
 func doEvery(d time.Duration, f func(time.Time)) {
