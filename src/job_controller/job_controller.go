@@ -2,7 +2,7 @@ package job_controller
 
 import (
     "fmt"
-    "time"
+    "net/http"
     /* oidc needed for auth to IBM Cloud but is not referenced specifically in
     this script */
     _ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
@@ -71,7 +71,7 @@ func ConstructJob() *batchv1.Job {
     return job
 }
 
-func CreateJob(t time.Time) {
+func CreateJob(w http.ResponseWriter, r *http.Request) {
     // get k8s client
     c, err := NewClientInCluster()
     // create jobs client
