@@ -8,12 +8,12 @@ RUN go get -d -v
 RUN go get -v k8s.io/client-go/...
 
 # build the binary
-RUN go build -v -o /go/bin/create_job.go
+RUN go build -v -o /go/bin/main.go
 
 # STEP 2 build a small image
 # start from alpine
 FROM alpine:3.8
 
 # copy our static executable
-COPY --from=builder /go/bin/create_job.go /bin/create_job.go
-ENTRYPOINT ["/bin/create_job.go"]
+COPY --from=builder /go/bin/main.go /bin/main.go
+ENTRYPOINT ["/bin/main.go"]

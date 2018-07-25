@@ -1,4 +1,4 @@
-package main
+package job_controller
 
 import (
     "fmt"
@@ -15,6 +15,16 @@ import (
 
 type Client struct {
     clientset kubernetes.Interface
+}
+
+// IsJobFinished returns whether the given Job has finished or not
+func IsJobFinished(job batchv1.Job) bool {
+    return job.Status.Succeeded > 0
+}
+
+// IsPodFinished returns whether the given Pod has finished or not
+func IsPodFinished(pod v1.Pod) bool {
+    return pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed
 }
 
 func NewClientInCluster() (*Client, error) {
@@ -61,7 +71,7 @@ func ConstructJob() *batchv1.Job {
     return job
 }
 
-func CreateJobs(t time.Time) {
+func CreateJob(t time.Time) {
     // get k8s client
     c, err := NewClientInCluster()
     // create jobs client
@@ -77,14 +87,4 @@ func CreateJobs(t time.Time) {
         panic(err1)
     }
     fmt.Printf("Created job %q.\n", result1)
-}
-
-func doEvery(d time.Duration, f func(time.Time)) {
-    for x := range time.Tick(d) {
-        f(x)
-    }
-}
-
-func main() {
-    doEvery(15000*time.Millisecond, CreateJobs)
 }
