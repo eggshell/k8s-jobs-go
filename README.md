@@ -1,7 +1,7 @@
 # job-controller
 
-golang script, dockerfile, and kubernetes deployment manifest for running a pod
-which will spawn kubernetes jobs on a set interval.
+golang package providing an easy way to programmatically spawn and keep track
+of kubernetes jobs within its own cluster.
 
 ## Acknowledgements
 

@@ -7,9 +7,9 @@ spec:
   ports:
   - port: 8000
     protocol: TCP
-    name: rotisserie-app
+    name: job-controller
   selector:
-    app: rotisserie-app
+    app: job-controller
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
