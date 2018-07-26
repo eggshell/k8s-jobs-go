@@ -1,4 +1,16 @@
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: job-controller
+spec:
+  ports:
+  - port: 8000
+    protocol: TCP
+    name: rotisserie-app
+  selector:
+    app: rotisserie-app
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -13,3 +25,5 @@ spec:
       containers:
       - name: workshop
         image: eggshell/job-controller
+        ports:
+          - containerPort: 8000
