@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-    http.HandleFunc("/", job_controller.CreateJob)
+    http.HandleFunc("/", job_controller.StartNewJobSet)
     http.ListenAndServe(":8000", nil)
 }

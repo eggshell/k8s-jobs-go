@@ -2,7 +2,6 @@ package job_controller
 
 import (
     "fmt"
-    "net/http"
     /* oidc needed for auth to IBM Cloud but is not referenced specifically in
     this script */
     _ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
@@ -15,16 +14,6 @@ import (
 
 type Client struct {
     clientset kubernetes.Interface
-}
-
-// IsJobFinished returns whether the given Job has finished or not
-func IsJobFinished(job batchv1.Job) bool {
-    return job.Status.Succeeded > 0
-}
-
-// IsPodFinished returns whether the given Pod has finished or not
-func IsPodFinished(pod v1.Pod) bool {
-    return pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed
 }
 
 func NewClientInCluster() (*Client, error) {
@@ -71,7 +60,7 @@ func ConstructJob() *batchv1.Job {
     return job
 }
 
-func CreateJob(w http.ResponseWriter, r *http.Request) {
+func CreateJob() {
     // get k8s client
     c, err := NewClientInCluster()
     // create jobs client
