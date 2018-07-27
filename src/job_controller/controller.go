@@ -16,6 +16,7 @@ func IsPodFinished(pod v1.Pod) bool {
     return pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed
 }
 
+// Starts a new set of jobs when hit with an http request
 func StartNewJobSet(w http.ResponseWriter, r *http.Request) {
     CreateJob()
 }

@@ -67,13 +67,12 @@ func CreateJob() {
     jobsClient := c.clientset.BatchV1().Jobs("default")
     // construct kubernetes job
     job := ConstructJob()
-
     // send job to kubernetes api
-    fmt.Println("Creating job... ")
-    result1, err1 := jobsClient.Create(job)
+    fmt.Println("Creating job...")
+    result, err := jobsClient.Create(job)
     if err != nil {
-        fmt.Println(err1)
-        panic(err1)
+        fmt.Println(err.Error())
+    } else {
+        fmt.Println("Created job %q.", result)
     }
-    fmt.Printf("Created job %q.\n", result1)
 }
