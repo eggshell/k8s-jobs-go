@@ -12,18 +12,6 @@ roleRef:
   name: cluster-admin
   apiGroup: rbac.authorization.k8s.io
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: job-controller
-spec:
-  ports:
-  - port: 8000
-    protocol: TCP
-    name: job-controller
-  selector:
-    app: job-controller
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -38,5 +26,3 @@ spec:
       containers:
       - name: workshop
         image: eggshell/job-controller
-        ports:
-          - containerPort: 8000
