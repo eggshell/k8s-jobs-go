@@ -12,10 +12,6 @@ import (
     "k8s.io/client-go/rest"
 )
 
-type Client struct {
-    clientset kubernetes.Interface
-}
-
 func NewClientInCluster() (*Client, error) {
     // gets in-cluster config using serviceaccount token
     config, err := rest.InClusterConfig()
