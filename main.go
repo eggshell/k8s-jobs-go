@@ -1,11 +1,16 @@
 package main
 
 import (
-    "net/http"
+    "time"
     "./src/job_controller"
 )
 
+func doEvery(d time.Duration, f func(time.Time)) {
+    for x := range time.Tick(d) {
+        f(x)
+    }
+}
+
 func main() {
-    http.HandleFunc("/", job_controller.StartNewJobSet)
-    http.ListenAndServe(":8000", nil)
+    doEvery(15000*time.Millisecond, job_controller.StartNewJobSet)
 }

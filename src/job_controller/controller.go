@@ -1,7 +1,7 @@
 package job_controller
 
 import (
-    "net/http"
+    "time"
     v1 "k8s.io/api/core/v1"
     batchv1 "k8s.io/api/batch/v1"
 )
@@ -17,6 +17,6 @@ func IsPodFinished(pod v1.Pod) bool {
 }
 
 // Starts a new set of jobs when hit with an http request
-func StartNewJobSet(w http.ResponseWriter, r *http.Request) {
+func StartNewJobSet(t time.Time) {
     CreateJob()
 }
