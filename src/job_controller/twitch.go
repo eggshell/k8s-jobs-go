@@ -6,7 +6,7 @@ import (
     twitch "github.com/Onestay/go-new-twitch"
 )
 
-func UpdateStreamsList() []string {
+func UpdateStreamsList() []Stream {
     client := twitch.NewClient(os.Getenv("client_id"))
     input := twitch.GetStreamsInput{
         GameID: []string{"33214"},
@@ -19,16 +19,17 @@ func UpdateStreamsList() []string {
     }
 
     size := len(resp)
-    user_ids := make([]string, size)
+    streams := make([]Stream, size)
 
     for k := range resp {
         user_resp, err := client.GetUsersByID(resp[k].UserID)
         if err != nil {
             fmt.Println("An error occurred while getting the user: %v", err)
         } else {
-            user_ids[k] = user_resp[0].DisplayName
+            streams[k].displayName = user_resp[0].DisplayName
+            streams[k].alive = 100
         }
     }
 
-    return user_ids
+    return streams
 }
