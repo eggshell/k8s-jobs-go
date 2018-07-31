@@ -1,16 +1,25 @@
 package main
 
 import (
+    "fmt"
     "time"
-    "./src/job_controller"
+    jc "./src/job_controller"
 )
 
-func doEvery(d time.Duration, f func(time.Time)) {
-    for x := range time.Tick(d) {
-        f(x)
-    }
-}
-
 func main() {
-    doEvery(15000*time.Millisecond, job_controller.StartNewJobSet)
+    listInterval := time.NewTicker(20 * time.Second).C
+    bestInterval := time.NewTicker(30 * time.Second).C
+
+    for {
+        select {
+        case <- listInterval:
+            fmt.Println("Getting list of streams")
+            user_ids := jc.UpdateStreamsList()
+            for k := range user_ids {
+                fmt.Println(user_ids[k])
+            }
+        case <- bestInterval:
+            fmt.Println("Finding best stream")
+      }
+    }
 }
