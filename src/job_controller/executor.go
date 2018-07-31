@@ -12,7 +12,7 @@ import (
     "k8s.io/client-go/rest"
 )
 
-func NewClientInCluster() (*Client, error) {
+func KubeClientInCluster() (*Client, error) {
     // gets in-cluster config using serviceaccount token
     config, err := rest.InClusterConfig()
     if err != nil {
@@ -58,7 +58,7 @@ func ConstructJob() *batchv1.Job {
 
 func CreateJob() {
     // get k8s client
-    c, err := NewClientInCluster()
+    c, err := KubeClientInCluster()
     // create jobs client
     jobsClient := c.clientset.BatchV1().Jobs("default")
     // construct kubernetes job
