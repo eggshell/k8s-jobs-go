@@ -16,12 +16,12 @@ func KubeClientInCluster() (*Client, error) {
     // gets in-cluster config using serviceaccount token
     config, err := rest.InClusterConfig()
     if err != nil {
-        panic(err.Error())
+        fmt.Println(err.Error())
     }
     // creates the clientset from config
     clientset, err := kubernetes.NewForConfig(config)
     if err != nil {
-        panic(err.Error())
+        fmt.Println(err.Error())
     }
 
     return &Client{
