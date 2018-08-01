@@ -1,18 +1,16 @@
 package job_controller
 
 import (
+    "fmt"
     "encoding/json"
     "os"
     "github.com/go-redis/redis"
 )
 
 func GetRedisClient() redis.Client {
-    redisAddr := os.Getenv("redis_addr")
-    redisPort := os.Getenv("redis_port")
-    redisPass := os.Getenv("redis_pass")
     client := redis.NewClient(&redis.Options{
-        Addr:       redisAddr + ":" + redisPort,
-        Password:   redisPass,
+        Addr:       os.Getenv("redis_addr") + ":" + os.Getenv("redis_port"),
+        Password:   os.Getenv("redis_pass"),
         DB:         0,
     })
 
@@ -25,12 +23,12 @@ func UpdateStreamsList(streams []Stream) {
 
     streamsJSON, errJSON := json.Marshal(streams)
     if errJSON != nil {
-        panic(errJSON)
+        fmt.Println(errJSON)
     }
 
     err := client.SAdd("streams", streamsJSON, 0).Err()
     if err != nil {
-        panic(err)
+        fmt.Println(err)
     }
 }
 
