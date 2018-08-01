@@ -1,7 +1,6 @@
 package job_controller
 
 import (
-    "fmt"
     v1 "k8s.io/api/core/v1"
     batchv1 "k8s.io/api/batch/v1"
 )
@@ -18,9 +17,5 @@ func IsPodFinished(pod v1.Pod) bool {
 
 // Starts a new set of jobs
 func StartNewJobSet() {
-    streams := UpdateStreamsList()
-    for k := range streams {
-        fmt.Println(streams[k])
-        //CreateJob()
-    }
+    CreateJob()
 }

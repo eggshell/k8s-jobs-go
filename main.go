@@ -14,12 +14,11 @@ func main() {
         select {
         case <- listInterval:
             fmt.Println("Getting list of streams")
-            user_ids := jc.UpdateStreamsList()
-            for k := range user_ids {
-                fmt.Println(user_ids[k])
-            }
+            streams := jc.GetLiveStreams()
+            jc.UpdateStreamsList(streams)
         case <- bestInterval:
             fmt.Println("Finding best stream")
-      }
+            //jc.StartNewJobSet()
+        }
     }
 }

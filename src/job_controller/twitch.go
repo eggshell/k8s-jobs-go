@@ -6,7 +6,7 @@ import (
     twitch "github.com/Onestay/go-new-twitch"
 )
 
-func UpdateStreamsList() []Stream {
+func GetLiveStreams() []Stream {
     client := twitch.NewClient(os.Getenv("client_id"))
     input := twitch.GetStreamsInput{
         GameID: []string{"33214"},
