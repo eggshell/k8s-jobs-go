@@ -17,23 +17,8 @@ func GetRedisClient() redis.Client {
     return *client
 }
 
-// puts list of streams in redis
-func UpdateStreamsList(streams []Stream) {
-    client := GetRedisClient()
-
-    streamsJSON, errJSON := json.Marshal(streams)
-    if errJSON != nil {
-        fmt.Println(errJSON)
-    }
-
-    err := client.SAdd("streams", streamsJSON, 0).Err()
-    if err != nil {
-        fmt.Println(err)
-    }
-}
-
 // TODO
 // get list of streams stored in redis
-//func CheckStreamsList() {
+//func CheckWorkQueue() {
 //    client := GetRedisClient()
 //}

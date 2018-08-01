@@ -7,18 +7,16 @@ import (
 )
 
 func main() {
-    listInterval := time.NewTicker(20 * time.Second).C
-    bestInterval := time.NewTicker(30 * time.Second).C
+    interval := time.NewTicker(3 * time.Second).C
 
     for {
         select {
-        case <- listInterval:
-            fmt.Println("Getting list of streams")
-            streams := jc.GetLiveStreams()
-            jc.UpdateStreamsList(streams)
-        case <- bestInterval:
-            fmt.Println("Finding best stream")
-            //jc.StartNewJobSet()
+        case <- interval:
+            fmt.Println("Checking stream list in Redis")
+            // some conditional.
+            // if work to do, fire up jobs
+            // check if pods are done doing work and rename key
+            // else nothing
         }
     }
 }
