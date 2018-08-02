@@ -33,25 +33,30 @@ func KubeClientInCluster() (*Client, error) {
     }, nil
 }
 
-func ConstructJob() *batchv1.Job {
+// TODO: figure out if this jobspec actually works
+// ref: https://kubernetes.io/docs/tasks/job/coarse-parallel-processing-work-queue/
+func ConstructJob(workItems []string) *batchv1.Job {
+    compCount := int32(1)
+    podCount := int32(len(workItems))
     job := &batchv1.Job{
         ObjectMeta: metav1.ObjectMeta{
-            GenerateName: "whalesay-job-",
+            GenerateName: "job-wq-",
             Namespace: "default",
         },
         Spec: batchv1.JobSpec{
+            Completions: &compCount,
+            Parallelism: &podCount,
             Template: v1.PodTemplateSpec{
                 ObjectMeta: metav1.ObjectMeta{
-                    GenerateName: "whalesay-job-",
+                    GenerateName: "job-wq-",
                 },
                 Spec: v1.PodSpec{
                     Containers: []v1.Container{
                         {
-                            Name:  "whalesay",
+                            Name:  "c",
                             Image: "docker/whalesay",
                         },
                     },
-                    RestartPolicy: v1.RestartPolicyOnFailure,
                 },
             },
         },
@@ -63,7 +68,7 @@ func ConstructJob() *batchv1.Job {
 func CreateJob(workItems []string) {
     c, err := KubeClientInCluster()
     jobsClient := c.clientset.BatchV1().Jobs("default")
-    job := ConstructJob()
+    job := ConstructJob(workItems)
 
     fmt.Println("Creating job...")
     result, err := jobsClient.Create(job)
