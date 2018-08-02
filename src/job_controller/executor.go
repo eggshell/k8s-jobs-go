@@ -57,13 +57,10 @@ func ConstructJob() *batchv1.Job {
 }
 
 func CreateJob() {
-    // get k8s client
     c, err := KubeClientInCluster()
-    // create jobs client
     jobsClient := c.clientset.BatchV1().Jobs("default")
-    // construct kubernetes job
     job := ConstructJob()
-    // send job to kubernetes api
+
     fmt.Println("Creating job...")
     result, err := jobsClient.Create(job)
     if err != nil {

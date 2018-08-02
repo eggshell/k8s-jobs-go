@@ -13,10 +13,12 @@ func main() {
         select {
         case <- interval:
             fmt.Println("Checking stream list in Redis")
-            // some conditional.
-            // if work to do, fire up jobs
-            // check if pods are done doing work and rename key
-            // else nothing
+            streams := jc.CheckWorkQueue()
+            if streams != "" {
+                jc.StartNewJobSet()
+            } else {
+                fmt.Println("No work to do. Waiting for next interval.")
+            }
         }
     }
 }

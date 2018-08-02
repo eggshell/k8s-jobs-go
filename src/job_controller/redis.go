@@ -2,7 +2,6 @@ package job_controller
 
 import (
     "fmt"
-    "encoding/json"
     "os"
     "github.com/go-redis/redis"
 )
@@ -17,8 +16,27 @@ func GetRedisClient() redis.Client {
     return *client
 }
 
-// TODO
-// get list of streams stored in redis
-//func CheckWorkQueue() {
-//    client := GetRedisClient()
-//}
+func CheckWorkQueue() string {
+    client := GetRedisClient()
+    val, err := client.Get("stream-list").Result()
+    if err != nil {
+        fmt.Println(err.Error())
+        return ""
+    } else if val == "" {
+        fmt.Println("Empty stream list")
+        return ""
+    }
+
+    return val
+}
+
+func RenameWorkKey() int {
+    client := GetRedisClient()
+    err := client.Rename("stream-list", "stream-list-old")
+    if err != nil {
+        fmt.Println(err)
+        return 1
+    }
+
+    return 0
+}
