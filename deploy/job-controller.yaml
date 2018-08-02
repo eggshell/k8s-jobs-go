@@ -26,3 +26,14 @@ spec:
       containers:
       - name: workshop
         image: eggshell/job-controller
+          env:
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: redis
+                key: redis-password
+          - name: REDIS_WORK_KEY
+            valueFrom:
+              secretKeyRef:
+                name: redis
+                key: redis-work-key
