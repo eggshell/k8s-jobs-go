@@ -1,0 +1,12 @@
+---
+notifications:
+  email: false
+
+jobs:
+  include:
+    - stage: build
+      language: bash
+      services:
+        - docker
+      script:
+        - docker build -t eggshell/job-controller .
