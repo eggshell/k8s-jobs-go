@@ -8,8 +8,8 @@ import (
 
 func GetRedisClient() redis.Client {
     client := redis.NewClient(&redis.Options{
-        Addr:       os.Getenv("redis_addr") + ":" + os.Getenv("redis_port"),
-        Password:   os.Getenv("redis_pass"),
+        Addr:       os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
+        Password:   os.Getenv("REDIS_PASSWORD"),
         DB:         0,
     })
 
@@ -18,7 +18,7 @@ func GetRedisClient() redis.Client {
 
 func CheckWorkQueue() string {
     client := GetRedisClient()
-    workKey := os.Getenv("redis_work_key")
+    workKey := os.Getenv("REDIS_WORK_KEY")
 
     val, err := client.Get(workKey).Result()
     if err != nil {
@@ -34,6 +34,7 @@ func CheckWorkQueue() string {
 
 func RenameWorkKey() int {
     client := GetRedisClient()
+    workKey := os.Getenv("REDIS_WORK_KEY")
     err := client.Rename(workKey, workKey + "-old")
     if err != nil {
         fmt.Println(err)
