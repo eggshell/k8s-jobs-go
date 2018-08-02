@@ -6,6 +6,10 @@
 golang package providing an easy way to programmatically spawn and keep track
 of kubernetes jobs within its own cluster.
 
+## Architecture
+
+![job-controller diagram](img/job-controller-diagram.png)
+
 ## Acknowledgements
 
 * [Multi-stage docker build to keep golang docker image size down](https://medium.com/@chemidy/create-the-smallest-and-secured-golang-docker-image-based-on-scratch-4752223b7324)
