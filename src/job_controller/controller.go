@@ -16,6 +16,6 @@ func IsPodFinished(pod v1.Pod) bool {
 }
 
 // Starts a new set of jobs
-func StartNewJobSet() {
-    CreateJob()
+func StartNewJobSet(workItems string) {
+    CreateJob(workItems)
 }

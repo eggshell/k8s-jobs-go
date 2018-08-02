@@ -18,12 +18,14 @@ func GetRedisClient() redis.Client {
 
 func CheckWorkQueue() string {
     client := GetRedisClient()
-    val, err := client.Get("stream-list").Result()
+    workKey := os.Getenv("redis_work_key")
+
+    val, err := client.Get(workKey).Result()
     if err != nil {
         fmt.Println(err.Error())
         return ""
     } else if val == "" {
-        fmt.Println("Empty stream list")
+        fmt.Println("Empty work queue")
         return ""
     }
 
@@ -32,7 +34,7 @@ func CheckWorkQueue() string {
 
 func RenameWorkKey() int {
     client := GetRedisClient()
-    err := client.Rename("stream-list", "stream-list-old")
+    err := client.Rename(workKey, workKey + "-old")
     if err != nil {
         fmt.Println(err)
         return 1

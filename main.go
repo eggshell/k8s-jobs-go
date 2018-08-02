@@ -12,10 +12,10 @@ func main() {
     for {
         select {
         case <- interval:
-            fmt.Println("Checking stream list in Redis")
-            streams := jc.CheckWorkQueue()
-            if streams != "" {
-                jc.StartNewJobSet()
+            fmt.Println("Checking for work to do")
+            workItems := jc.CheckWorkQueue()
+            if workItems != "" {
+                jc.StartNewJobSet(workItems)
             } else {
                 fmt.Println("No work to do. Waiting for next interval.")
             }
