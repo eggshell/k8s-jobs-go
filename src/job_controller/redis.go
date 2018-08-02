@@ -16,20 +16,16 @@ func GetRedisClient() redis.Client {
     return *client
 }
 
-func CheckWorkQueue() string {
-    client := GetRedisClient()
-    workKey := os.Getenv("REDIS_WORK_KEY")
+func CheckWorkQueue() []string {
+    client    := GetRedisClient()
+    workKey   := os.Getenv("REDIS_WORK_KEY")
 
-    val, err := client.Get(workKey).Result()
+    workItems, err := client.ZRange(workKey, 0, 20).Result()
     if err != nil {
-        fmt.Println(err.Error())
-        return ""
-    } else if val == "" {
-        fmt.Println("Empty work queue")
-        return ""
+        return nil
     }
 
-    return val
+    return workItems
 }
 
 func RenameWorkKey() int {

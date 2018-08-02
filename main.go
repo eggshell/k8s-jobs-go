@@ -14,7 +14,7 @@ func main() {
         case <- interval:
             fmt.Println("Checking for work to do")
             workItems := jc.CheckWorkQueue()
-            if workItems != "" {
+            if workItems != nil {
                 jc.StartNewJobSet(workItems)
             } else {
                 fmt.Println("No work to do. Waiting for next interval.")

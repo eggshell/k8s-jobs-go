@@ -60,7 +60,7 @@ func ConstructJob() *batchv1.Job {
     return job
 }
 
-func CreateJob(workItems string) {
+func CreateJob(workItems []string) {
     c, err := KubeClientInCluster()
     jobsClient := c.clientset.BatchV1().Jobs("default")
     job := ConstructJob()
