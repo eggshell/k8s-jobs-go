@@ -15,7 +15,7 @@ func main() {
             fmt.Println("Checking for work to do")
             workItems := jc.CheckWorkQueue()
             if workItems != nil {
-                jc.StartNewJobSet(workItems)
+                jc.CreateJob(workItems)
             } else {
                 fmt.Println("No work to do. Waiting for next interval.")
             }
