@@ -63,8 +63,8 @@ func ConstructJob(workItems []string) *batchv1.Job {
                 Spec: v1.PodSpec{
                     Containers: []v1.Container{
                         {
-                            Name:  "c",
-                            Image: "docker/whalesay",
+                            Name:  "sp-",
+                            Image: "registry.ng.bluemix.net/eggshell/rotisserie-sp",
                         },
                     },
                 },
