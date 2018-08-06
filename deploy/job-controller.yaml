@@ -32,7 +32,7 @@ spec:
               secretKeyRef:
                 name: redis
                 key: redis-password
-          - name: REDIS_WORK_KEY
+          - name: REDIS_READ_KEY
             valueFrom:
               secretKeyRef:
                 name: redis

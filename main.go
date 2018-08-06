@@ -14,8 +14,13 @@ func main() {
         select {
         case <- interval:
             fmt.Println("Checking for work to do")
-            workItems := jc.CheckWorkQueue(redisClient)
-            if workItems != nil {
+            workItems, err := jc.CheckWorkQueue(redisClient)
+            if err != nil {
+                fmt.Println(err.Error())
+            }
+
+            if workItems != nil && len(workItems) != 0 {
+                fmt.Println("workItems: ", len(workItems))
                 jc.CreateJob(workItems)
             } else {
                 fmt.Println("No work to do. Waiting for next interval.")

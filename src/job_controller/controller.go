@@ -48,6 +48,7 @@ func IsPodFinished(pod v1.Pod) bool {
 func ConstructJob(workItems []string) *batchv1.Job {
     compCount := int32(1)
     podCount := int32(len(workItems))
+
     job := &batchv1.Job{
         ObjectMeta: metav1.ObjectMeta{
             GenerateName: "job-wq-",
@@ -63,10 +64,11 @@ func ConstructJob(workItems []string) *batchv1.Job {
                 Spec: v1.PodSpec{
                     Containers: []v1.Container{
                         {
-                            Name:  "sp-",
-                            Image: "registry.ng.bluemix.net/eggshell/rotisserie-sp",
+                            Name:  "sp",
+                            Image: "registry.ng.bluemix.net/eggshell/rotisserie-sp:e14ccc4",
                         },
                     },
+                    RestartPolicy: v1.RestartPolicyNever,
                 },
             },
         },
