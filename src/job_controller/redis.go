@@ -16,10 +16,10 @@ func GetRedisClient() redis.Client {
     return *client
 }
 
-func CheckWorkQueue() []string {
-    client    := GetRedisClient()
-    workKey   := os.Getenv("REDIS_WORK_KEY")
+func CheckWorkQueue(client redis.Client) []string {
+    workKey := os.Getenv("REDIS_WORK_KEY")
 
+    // TODO: find way to up 20 (number of streams to process)
     workItems, err := client.ZRange(workKey, 0, 20).Result()
     if err != nil {
         return nil
@@ -28,8 +28,7 @@ func CheckWorkQueue() []string {
     return workItems
 }
 
-func RenameWorkKey() int {
-    client := GetRedisClient()
+func RenameWorkKey(client redis.Client) int {
     workKey := os.Getenv("REDIS_WORK_KEY")
     err := client.Rename(workKey, workKey + "-old")
     if err != nil {

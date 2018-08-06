@@ -6,7 +6,7 @@
 golang package providing an easy way to programmatically spawn and keep track
 of kubernetes jobs within its own cluster.
 
-## Architecture
+## Diagram
 
 ![job-controller diagram](img/job-controller-diagram.png)
 
