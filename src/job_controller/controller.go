@@ -2,6 +2,7 @@ package job_controller
 
 import (
     "fmt"
+    "os"
     /* oidc needed for auth to IBM Cloud but is not referenced specifically in
     this script */
     _ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
@@ -65,7 +66,17 @@ func ConstructJob(workItems []string) *batchv1.Job {
                     Containers: []v1.Container{
                         {
                             Name:  "sp",
-                            Image: "registry.ng.bluemix.net/eggshell/rotisserie-sp:e14ccc4",
+                            Image: "registry.ng.bluemix.net/eggshell/rotisserie-sp:d02aaf2",
+                            Env: []v1.EnvVar{
+                                {
+                                    Name: "REDIS_PASSWORD",
+                                    Value: os.Getenv("REDIS_PASSWORD"),
+                                },
+                                {
+                                    Name: "TOKEN",
+                                    Value: os.Getenv("TOKEN"),
+                                },
+                            },
                         },
                     },
                     RestartPolicy: v1.RestartPolicyNever,
