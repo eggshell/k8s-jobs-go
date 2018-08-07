@@ -3,6 +3,7 @@ package job_controller
 import (
     "fmt"
     "os"
+    "github.com/go-redis/redis"
     /* oidc needed for auth to IBM Cloud but is not referenced specifically in
     this script */
     _ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
@@ -47,7 +48,7 @@ func IsPodFinished(pod v1.Pod) bool {
 // TODO: figure out if this jobspec actually works
 // ref: https://kubernetes.io/docs/tasks/job/coarse-parallel-processing-work-queue/
 func ConstructJob(workItems []string) *batchv1.Job {
-    compCount := int32(1)
+    compCount := int32(len(workItems))
     podCount := int32(len(workItems))
 
     job := &batchv1.Job{
@@ -60,13 +61,13 @@ func ConstructJob(workItems []string) *batchv1.Job {
             Parallelism: &podCount,
             Template: v1.PodTemplateSpec{
                 ObjectMeta: metav1.ObjectMeta{
-                    GenerateName: "job-wq-",
+                    GenerateName: "job-wq-1",
                 },
                 Spec: v1.PodSpec{
                     Containers: []v1.Container{
                         {
                             Name:  "sp",
-                            Image: "registry.ng.bluemix.net/eggshell/rotisserie-sp:d02aaf2",
+                            Image: "registry.ng.bluemix.net/eggshell/rotisserie-sp:88bfa18",
                             Env: []v1.EnvVar{
                                 {
                                     Name: "REDIS_PASSWORD",
@@ -88,7 +89,12 @@ func ConstructJob(workItems []string) *batchv1.Job {
     return job
 }
 
-func CreateJob(workItems []string) {
+func CreateJob(client redis.Client, workItems []string) {
+    err := RenameReadKey(client)
+    if err != nil {
+        fmt.Println(err)
+    }
+
     c, err := KubeClientInCluster()
     jobsClient := c.clientset.BatchV1().Jobs("default")
     job := ConstructJob(workItems)

@@ -1,7 +1,6 @@
 package job_controller
 
 import (
-    "fmt"
     "os"
     "github.com/go-redis/redis"
 )
@@ -17,8 +16,6 @@ func GetRedisClient() redis.Client {
 }
 
 func CheckWorkQueue(client redis.Client) ([]string, error) {
-    //workKey := os.Getenv("stream-list")
-
     workItems, err := client.SMembers("stream-list").Result()
     if err != nil {
         return nil, err
@@ -27,13 +24,12 @@ func CheckWorkQueue(client redis.Client) ([]string, error) {
     return workItems, nil
 }
 
-func RenameWorkKey(client redis.Client) int {
-    //workKey := os.Getenv("stream-list")
-    err := client.Rename("stream-list", "stream-list-old")
+func RenameReadKey(client redis.Client) error {
+    val, err := client.Rename("stream-list", "work").Result()
+    _ = val
     if err != nil {
-        fmt.Println(err)
-        return 1
+        return err
     }
 
-    return 0
+    return nil
 }
