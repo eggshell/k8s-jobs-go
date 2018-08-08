@@ -5,7 +5,6 @@ WORKDIR $GOPATH/src/
 
 # get dependencies
 RUN go get -d -v
-RUN go get -v k8s.io/client-go/...
 
 # build the binary
 RUN go build -v -o /go/bin/main.go
