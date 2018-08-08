@@ -18,3 +18,5 @@ of kubernetes jobs within its own cluster.
 
 * [dtan4's k8s-job-cleaner](https://github.com/dtan4/k8s-job-cleaner) for its
   examples of using client-go.
+
+* [NVIDIA's implementation of seeing if k8s jobs are finished](https://github.com/NVIDIA/kubernetes/blob/master/pkg/controller/job/utils.go)
