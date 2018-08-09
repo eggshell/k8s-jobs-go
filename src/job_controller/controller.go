@@ -1,11 +1,8 @@
 package job_controller
 
 import (
-    "fmt"
     "os"
     "github.com/go-redis/redis"
-    /* oidc needed for auth to IBM Cloud but is not referenced specifically in
-    this script */
     _ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
     v1 "k8s.io/api/core/v1"
     batchv1 "k8s.io/api/batch/v1"
@@ -22,12 +19,12 @@ func KubeClientInCluster() (*Client, error) {
     // gets in-cluster config using serviceaccount token
     config, err := rest.InClusterConfig()
     if err != nil {
-        fmt.Println(err.Error())
+        return nil, err
     }
     // creates the clientset from config
     clientset, err := kubernetes.NewForConfig(config)
     if err != nil {
-        fmt.Println(err.Error())
+        return nil, err
     }
 
     return &Client{
@@ -36,8 +33,9 @@ func KubeClientInCluster() (*Client, error) {
 }
 
 func DeleteJob(c *Client, job batchv1.Job) error {
-    if err := c.clientset.BatchV1().Jobs(job.Namespace).Delete(job.Name, &metav1.DeleteOptions{}); err != nil {
-        return err
+    if err := c.clientset.BatchV1().Jobs(job.Namespace).Delete(job.Name,
+    &metav1.DeleteOptions{}); err != nil {
+            return err
     }
 
     return nil
@@ -52,8 +50,6 @@ func ListJobs(c *Client, namespace string) (*batchv1.JobList, error) {
     return jobs, nil
 }
 
-
-// IsJobFinished returns whether the given Job has finished or not
 func IsJobFinished(j batchv1.Job) bool {
     for _, c := range j.Status.Conditions {
         if (c.Type == batchv1.JobComplete || c.Type == batchv1.JobFailed) && c.Status == v1.ConditionTrue {
@@ -63,17 +59,10 @@ func IsJobFinished(j batchv1.Job) bool {
     return false
 }
 
-// IsPodFinished returns whether the given Pod has finished or not
-func IsPodFinished(pod v1.Pod) bool {
-    return pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed
-}
-
-// TODO: figure out if this jobspec actually works
-// ref: https://kubernetes.io/docs/tasks/job/coarse-parallel-processing-work-queue/
 func ConstructJob(workItems []string) *batchv1.Job {
     count := int32(len(workItems))
 
-    job := &batchv1.Job{
+    jobSpec := &batchv1.Job{
         ObjectMeta: metav1.ObjectMeta{
             GenerateName: "job-wq-",
             Namespace: "default",
@@ -89,7 +78,7 @@ func ConstructJob(workItems []string) *batchv1.Job {
                     Containers: []v1.Container{
                         {
                             Name:  "sp",
-                            Image: "registry.ng.bluemix.net/eggshell/rotisserie-sp:4472956",
+                            Image: "registry.ng.bluemix.net/eggshell/rotisserie-sp:cc3eb17",
                             Env: []v1.EnvVar{
                                 {
                                     Name: "REDIS_PASSWORD",
@@ -107,23 +96,21 @@ func ConstructJob(workItems []string) *batchv1.Job {
             },
         },
     }
-    return job
+    return jobSpec
 }
 
-func CreateJob(client redis.Client, workItems []string) {
-    err := RenameReadKey(client)
+func CreateJob(kubeClient *Client, redisClient redis.Client, workItems []string) (*batchv1.Job, error) {
+    err := RenameReadKey(redisClient)
     if err != nil {
-        fmt.Println(err)
+        return nil,err
     }
 
-    c, err := KubeClientInCluster()
-    jobsClient := c.clientset.BatchV1().Jobs("default")
-    job := ConstructJob(workItems)
-
-    fmt.Println("Creating job...")
-    result, err := jobsClient.Create(job)
+    jobsClient  := kubeClient.clientset.BatchV1().Jobs("default")
+    jobSpec     := ConstructJob(workItems)
+    job, err := jobsClient.Create(jobSpec)
     if err != nil {
-        fmt.Println(err.Error())
+        return nil,err
     }
-    fmt.Println("Created job %q.", result)
+
+    return job, nil
 }

@@ -7,8 +7,12 @@ import (
 )
 
 func main() {
-    var lock bool = false
-    redisClient := jc.GetRedisClient()
+    var lock bool    = false
+    redisClient     := jc.GetRedisClient()
+    kubeClient, err := jc.KubeClientInCluster()
+    if err != nil {
+        panic(err.Error())
+    }
     workInterval := time.NewTicker(3 * time.Second).C
     lockInterval := time.NewTicker(1 * time.Second).C
 
@@ -26,20 +30,25 @@ func main() {
 
             if workItems != nil && len(workItems) != 0 && lock == false {
                 lock = true
-                jc.CreateJob(redisClient, workItems)
+                job, err := jc.CreateJob(kubeClient, redisClient, workItems)
+                if err != nil {
+                    fmt.Println(err.Error())
+                }
+
+                fmt.Println("Created job %q.", job)
             } else {
                 fmt.Println("No work to do. Waiting for next interval.")
             }
         case <- lockInterval:
             fmt.Println("Checking to see if it's time to unlock the queue.")
             fmt.Println("lock status: ", lock)
+
             workExists, err := redisClient.Exists("work").Result()
             if err != nil {
                 fmt.Println(err.Error())
             }
 
-            c, err := jc.KubeClientInCluster()
-            jobs, err := jc.ListJobs(c, "default")
+            jobs, err := jc.ListJobs(kubeClient, "default")
             if err != nil {
                 fmt.Println(err.Error())
             }
@@ -52,7 +61,7 @@ func main() {
 
             if workExists == 0 && len(jobs.Items) != 0 && jc.IsJobFinished(jobs.Items[0]) == true {
                 fmt.Println("Deleting finished job")
-                err := jc.DeleteJob(c, jobs.Items[0])
+                err := jc.DeleteJob(kubeClient, jobs.Items[0])
                 if err != nil {
                     fmt.Println(err.Error())
                 }
