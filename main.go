@@ -13,8 +13,8 @@ func main() {
     if err != nil {
         panic(err.Error())
     }
-    workInterval := time.NewTicker(3 * time.Second).C
-    lockInterval := time.NewTicker(1 * time.Second).C
+    workInterval := time.NewTicker(1 * time.Second).C
+    lockInterval := time.NewTicker(333 * time.Millisecond).C
 
     for {
         select {
