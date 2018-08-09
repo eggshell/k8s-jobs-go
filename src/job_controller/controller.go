@@ -33,8 +33,10 @@ func KubeClientInCluster() (*Client, error) {
 }
 
 func DeleteJob(c *Client, job batchv1.Job) error {
+    var policy metav1.DeletionPropagation = "Background"
+
     if err := c.clientset.BatchV1().Jobs(job.Namespace).Delete(job.Name,
-    &metav1.DeleteOptions{}); err != nil {
+    &metav1.DeleteOptions{PropagationPolicy: &policy}); err != nil {
             return err
     }
 
@@ -78,7 +80,7 @@ func ConstructJob(workItems []string) *batchv1.Job {
                     Containers: []v1.Container{
                         {
                             Name:  "sp",
-                            Image: "registry.ng.bluemix.net/eggshell/rotisserie-sp:cc3eb17",
+                            Image: "registry.ng.bluemix.net/eggshell/rotisserie-sp:f7095a1",
                             Env: []v1.EnvVar{
                                 {
                                     Name: "REDIS_PASSWORD",
