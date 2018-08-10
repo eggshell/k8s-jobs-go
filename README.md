@@ -1,6 +1,7 @@
 # job-controller
 
 [![Build Status](https://travis-ci.org/eggshell/job-controller.svg?branch=master)](https://travis-ci.org/eggshell/job-controller)
+[![Go Report Card](https://goreportcard.com/badge/github.com/eggshell/job-controller)](https://goreportcard.com/report/github.com/eggshell/job-controller)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 golang package providing an easy way to programmatically spawn and keep track
