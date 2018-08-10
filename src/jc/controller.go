@@ -1,8 +1,7 @@
-package job_controller
+package jc
 
 import (
     "os"
-    "github.com/go-redis/redis"
     _ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
     v1 "k8s.io/api/core/v1"
     batchv1 "k8s.io/api/batch/v1"
@@ -11,11 +10,7 @@ import (
     "k8s.io/client-go/rest"
 )
 
-type Client struct {
-    clientset kubernetes.Interface
-}
-
-func KubeClientInCluster() (*Client, error) {
+func KubeClientInCluster() (*KubeClient, error) {
     // gets in-cluster config using serviceaccount token
     config, err := rest.InClusterConfig()
     if err != nil {
@@ -27,12 +22,12 @@ func KubeClientInCluster() (*Client, error) {
         return nil, err
     }
 
-    return &Client{
+    return &KubeClient{
         clientset: clientset,
     }, nil
 }
 
-func DeleteJob(c *Client, job batchv1.Job) error {
+func DeleteJob(c *KubeClient, job batchv1.Job) error {
     var policy metav1.DeletionPropagation = "Background"
 
     if err := c.clientset.BatchV1().Jobs(job.Namespace).Delete(job.Name,
@@ -43,7 +38,7 @@ func DeleteJob(c *Client, job batchv1.Job) error {
     return nil
 }
 
-func ListJobs(c *Client, namespace string) (*batchv1.JobList, error) {
+func ListJobs(c *KubeClient, namespace string) (*batchv1.JobList, error) {
     jobs, err := c.clientset.BatchV1().Jobs(namespace).List(metav1.ListOptions{})
     if err != nil {
         return nil, err
@@ -101,13 +96,13 @@ func ConstructJob(workItems []string) *batchv1.Job {
     return jobSpec
 }
 
-func CreateJob(kubeClient *Client, redisClient redis.Client, workItems []string) (*batchv1.Job, error) {
-    err := RenameReadKey(redisClient)
+func CreateJob(k *KubeClient, r RedisClient, workItems []string) (*batchv1.Job, error) {
+    err := RenameReadKey(r)
     if err != nil {
         return nil,err
     }
 
-    jobsClient  := kubeClient.clientset.BatchV1().Jobs("default")
+    jobsClient  := k.clientset.BatchV1().Jobs("default")
     jobSpec     := ConstructJob(workItems)
     job, err := jobsClient.Create(jobSpec)
     if err != nil {
