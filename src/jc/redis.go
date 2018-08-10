@@ -5,6 +5,7 @@ import (
     "github.com/go-redis/redis"
 )
 
+// GetRedisClient gets a redisClient object defined in types.go and returns it
 func GetRedisClient() RedisClient {
     client := redis.NewClient(&redis.Options{
         Addr:       "redis-master:6379",
@@ -15,6 +16,8 @@ func GetRedisClient() RedisClient {
     return *client
 }
 
+// CheckWorkQueue uses the SMEMBERS redis method to return a string array of
+// all members of a given set.
 func CheckWorkQueue(client RedisClient) ([]string, error) {
     workItems, err := client.SMembers("stream-list").Result()
     if err != nil {
@@ -24,6 +27,7 @@ func CheckWorkQueue(client RedisClient) ([]string, error) {
     return workItems, nil
 }
 
+// RenameReadKey uses the RENAME redis method to rename a key in redis.
 func RenameReadKey(client RedisClient) error {
     val, err := client.Rename("stream-list", "work").Result()
     _ = val

@@ -2,6 +2,7 @@ package jc
 
 import (
     "os"
+    // blank import needed for auth with certain k8s service providers
     _ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
     v1 "k8s.io/api/core/v1"
     batchv1 "k8s.io/api/batch/v1"
@@ -10,6 +11,8 @@ import (
     "k8s.io/client-go/rest"
 )
 
+// KubeClientInCluster gets an in-cluster kubeconfig using serviceaccount token
+// Returns a kubernetes client object defined in types.go
 func KubeClientInCluster() (*KubeClient, error) {
     // gets in-cluster config using serviceaccount token
     config, err := rest.InClusterConfig()
@@ -27,17 +30,20 @@ func KubeClientInCluster() (*KubeClient, error) {
     }, nil
 }
 
+// DeleteJob deletes a given job in a kubernetes cluster
 func DeleteJob(c *KubeClient, job batchv1.Job) error {
     var policy metav1.DeletionPropagation = "Background"
 
-    if err := c.clientset.BatchV1().Jobs(job.Namespace).Delete(job.Name,
-    &metav1.DeleteOptions{PropagationPolicy: &policy}); err != nil {
-            return err
+    err := c.clientset.BatchV1().Jobs(job.Namespace).Delete(job.Name,
+    &metav1.DeleteOptions{PropagationPolicy: &policy})
+    if err != nil {
+        return err
     }
 
     return nil
 }
 
+// ListJobs returns a JobsList object for a given kubernetes namespace
 func ListJobs(c *KubeClient, namespace string) (*batchv1.JobList, error) {
     jobs, err := c.clientset.BatchV1().Jobs(namespace).List(metav1.ListOptions{})
     if err != nil {
@@ -47,6 +53,8 @@ func ListJobs(c *KubeClient, namespace string) (*batchv1.JobList, error) {
     return jobs, nil
 }
 
+// IsJobFinished determines whether or not a given kubernetes job is running
+// Bases this boolean value on the status of the job and its dependent pods
 func IsJobFinished(j batchv1.Job) bool {
     for _, c := range j.Status.Conditions {
         if (c.Type == batchv1.JobComplete || c.Type == batchv1.JobFailed) && c.Status == v1.ConditionTrue {
@@ -56,6 +64,7 @@ func IsJobFinished(j batchv1.Job) bool {
     return false
 }
 
+// ConstructJob creates a batchv1.Job object from a JSON spec and returns it
 func ConstructJob(workItems []string) *batchv1.Job {
     count := int32(len(workItems))
 
@@ -96,6 +105,8 @@ func ConstructJob(workItems []string) *batchv1.Job {
     return jobSpec
 }
 
+// CreateJob gets a kubernetes job spec from construct job and sends that spec
+// to the kubernetes api to be created.
 func CreateJob(k *KubeClient, r RedisClient, workItems []string) (*batchv1.Job, error) {
     err := RenameReadKey(r)
     if err != nil {
@@ -104,7 +115,7 @@ func CreateJob(k *KubeClient, r RedisClient, workItems []string) (*batchv1.Job, 
 
     jobsClient  := k.clientset.BatchV1().Jobs("default")
     jobSpec     := ConstructJob(workItems)
-    job, err := jobsClient.Create(jobSpec)
+    job, err    := jobsClient.Create(jobSpec)
     if err != nil {
         return nil,err
     }
