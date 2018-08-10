@@ -1,8 +1,8 @@
 package jc
 
 import (
-    "k8s.io/client-go/kubernetes"
-    "github.com/go-redis/redis"
+	"github.com/go-redis/redis"
+	"k8s.io/client-go/kubernetes"
 )
 
 // RedisClient is an alias to redis.Client in the go-redis package
@@ -12,5 +12,5 @@ type RedisClient = redis.Client
 
 // KubeClient represents the wrapper of a Kubernetes API client
 type KubeClient struct {
-    clientset kubernetes.Interface
+	clientset kubernetes.Interface
 }
